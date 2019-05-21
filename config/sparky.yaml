@@ -1,0 +1,45 @@
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: spark-runner-local-jar02
+  namespace: spark
+spec:
+  type: Scala
+  mode: cluster
+  image: "kodelint/sparky:v0.2"
+  imagePullPolicy: Always
+  mainClass: com.adobe.search.datareaderwriter.runner
+  mainApplicationFile: "s3a://k8s-bucket-for-test-dev-store/data-reader-writer-1.0-SNAPSHOT.jar"
+  sparkConf:
+    "spark.hadoop.fs.s3a.aws.credentials.provider": com.amazonaws.auth.InstanceProfileCredentialsProvider
+    "spark.hadoop.fs.s3a.impl": org.apache.hadoop.fs.s3a.S3AFileSystem
+  arguments:
+    - "s3a://k8s-bucket-for-test-dev-store/part-00064-b198d2c7-16bb-4203-a9ad-692087586682.c000.snappy.parquet"
+    - "s3a://k8s-bucket-for-test-dev-dump/I-am-done.moron"
+  sparkVersion: "2.1.1"
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: "test-volume"
+      hostPath:
+        path: "/tmp"
+        type: Directory
+  driver:
+    cores: 0.1
+    coreLimit: "200m"
+    memory: "1024m"
+    labels:
+      version: 2.1.1
+    serviceAccount: sparkoperator
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"
+  executor:
+    cores: 1
+    instances: 2
+    memory: "1024m"
+    labels:
+      version: 2.1.1
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"
