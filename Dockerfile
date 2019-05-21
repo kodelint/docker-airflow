@@ -79,7 +79,8 @@ RUN  curl -L -o /usr/local/bin/kubectl \
 RUN mkdir -p ${AIRFLOW_HOME}/.kube/ 
 COPY config/kube.config ${AIRFLOW_HOME}/.kube/config
 COPY config/airflow.cfg ${AIRFLOW_HOME}/airflow.cfg
-COPY config/sparky.yaml ${AIRFLOW_HOME}/sparky.yaml
+COPY config/sparky-aws.yaml ${AIRFLOW_HOME}/sparky-aws.yaml
+COPY config/sparky-az.yaml ${AIRFLOW_HOME}/sparky-az.yaml
 COPY script/entrypoint.sh /entrypoint.sh
 COPY script/sparky-ubuntu /usr/local/bin/sparky
 COPY dags/* /usr/local/airflow/dags/

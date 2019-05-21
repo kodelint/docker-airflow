@@ -1,0 +1,59 @@
+apiVersion: "sparkoperator.k8s.io/v1beta1"
+kind: SparkApplication
+metadata:
+  name: spark-runnering-on-azure-s3-job01
+  namespace: az-on-demand-spark
+spec:
+  type: Scala
+  mode: cluster
+  image: "kodelint/sparky:v0.2"
+  imagePullPolicy: Always
+  mainClass: com.adobe.search.datareaderwriter.runner
+  mainApplicationFile: "s3a://k8s-bucket-for-test-dev-store/data-reader-writer-1.0-SNAPSHOT.jar"
+  sparkConf:
+    "spark.hadoop.fs.s3a.aws.credentials.provider": com.amazonaws.auth.InstanceProfileCredentialsProvider
+    "spark.hadoop.fs.s3a.impl": org.apache.hadoop.fs.s3a.S3AFileSystem
+  arguments:
+    - "s3a://k8s-bucket-for-test-dev-store/part-00064-b198d2c7-16bb-4203-a9ad-692087586682.c000.snappy.parquet"
+    - "s3a://k8s-bucket-for-test-dev-dump/I-am-done.moron"
+  sparkVersion: "2.4.1"
+  restartPolicy:
+    type: Never
+  volumes:
+    - name: "test-volume"
+      hostPath:
+        path: "/tmp"
+        type: Directory
+  driver:
+    envSecretKeyRefs:                               # Create K8S Secret to provide the AWS S3 Access to the containers.
+      AWS_ACCESS_KEY_ID:
+        name: awskeys                               # Name of the K8S Secret
+        key: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        name: awskeys
+        key: AWS_SECRET_ACCESS_KEY
+    cores: 0.1
+    coreLimit: "200m"
+    memory: "1024m"
+    labels:
+      version: 2.4.1
+    serviceAccount: sparkoperator
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"
+  executor:
+    envSecretKeyRefs:
+      AWS_ACCESS_KEY_ID:
+        name: awskeys
+        key: AWS_ACCESS_KEY_ID
+      AWS_SECRET_ACCESS_KEY:
+        name: awskeys
+        key: AWS_SECRET_ACCESS_KEY
+    cores: 1
+    instances: 2
+    memory: "1024m"
+    labels:
+      version: 2.4.1
+    volumeMounts:
+      - name: "test-volume"
+        mountPath: "/tmp"

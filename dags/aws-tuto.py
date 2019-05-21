@@ -60,7 +60,7 @@ t2 = BashOperator(
     dag=dag,
 )
 
-templated_command = '/usr/local/bin/sparky create $${AIRFLOW_HOME}/sparky.yaml -n spark'
+templated_command = '/usr/local/bin/sparky create $${AIRFLOW_HOME}/sparky-aws.yaml -n spark'
 
 t3 = BashOperator(
     task_id='templated',
